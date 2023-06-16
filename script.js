@@ -84,45 +84,48 @@ function renderCard(data, className = "") {
 
 function createCardCountry(nameCountry) {
   fetch(`https://restcountries.com/v3.1/name/${nameCountry}`)
-    .then(
-      (response) => response.json(),
-      (err) =>
-        countriesContainer.insertAdjacentText(
-          "beforeend",
-          `Произошла ошибка: ${err.message}. Попробуйте позже!`
-        )
-    )
+    .then((response) => {
+      if (!response.ok)
+        throw new Error(`Страна не найдена [${response.status}]`);
+      return response.json();
+    })
     .then((dataFromRes) => {
       const [data] = dataFromRes;
       renderCard(data);
-      if (data.borders.length > 0) createCardNeighbours(data);
+      if (data.borders && data.borders.length > 0) createCardNeighbours(data);
     })
-    .catch((err) =>
+    .catch((err) => {
       countriesContainer.insertAdjacentText(
         "beforeend",
-        `Произошла ошибка: ${err.message}. Попробуйте позже!`
-      )
-    );
+        `Ошибка: ${err.message}. Попробуйте еще раз!`
+      );
+      countriesContainer.style.opacity = 1;
+    });
 }
 
 function createCardNeighbours(data) {
   data.borders.forEach((code) => {
     fetch(`https://restcountries.com/v3.1/alpha/${code}`)
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok)
+          throw new Error(`Страна не найдена [${response.status}]`);
+        return response.json();
+      })
       .then((dataFromRes) => {
         const [data] = dataFromRes;
         renderCard(data, "neighbour");
       })
-      .catch((err) =>
+      .catch((err) => {
         countriesContainer.insertAdjacentText(
           "beforeend",
-          `Произошла ошибка: ${err.message}. Попробуйте позже!`
-        )
-      );
+          `Ошибка: ${err.message}. Попробуйте еще раз!`
+        );
+        countriesContainer.style.opacity = 1;
+      });
   });
 }
 
-btn.addEventListener("click", () => createCardCountry("russia"));
+btn.addEventListener("click", () => createCardCountry("usa"));
 //createCardCountry("russia");
 //createCardCountry("usa");
 //createCardCountry("deutschland");
