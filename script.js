@@ -125,7 +125,40 @@ function createCardNeighbours(data) {
   });
 }
 
-btn.addEventListener("click", () => createCardCountry("usa"));
+function getNameCountryByCurrentPositionAndcreateCardCountry() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        const apikey = "0683ad58-86fc-4c27-a6bc-b51fc632e528";
+        const request = `https://geocode-maps.yandex.ru/1.x?geocode=${latitude},${longitude}&apikey=${apikey}&format=json&lang=en_RU&sco=latlong`;
+        fetch(request)
+          .then((response) => {
+            if (!response.ok)
+              throw new Error(`Страна не найдена [${response.status}]`);
+            return response.json();
+          })
+          .then((dataFromRes) => {
+            const nameCountry =
+              dataFromRes.response.GeoObjectCollection.featureMember[0].GeoObject.metaDataProperty.GeocoderMetaData.AddressDetails.Country.CountryName.toLocaleLowerCase();
+            createCardCountry(nameCountry);
+          })
+          .catch((err) => {
+            countriesContainer.insertAdjacentText(
+              "beforeend",
+              `Ошибка: ${err.message}. Попробуйте еще раз!`
+            );
+            countriesContainer.style.opacity = 1;
+          });
+      },
+      () => alert("Вы не предоставили свою геопозицию")
+    );
+  }
+}
+
+btn.addEventListener("click", () =>
+  getNameCountryByCurrentPositionAndcreateCardCountry()
+);
 //createCardCountry("russia");
 //createCardCountry("usa");
 //createCardCountry("deutschland");
