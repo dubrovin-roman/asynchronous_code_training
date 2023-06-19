@@ -159,7 +159,21 @@ function getNameCountryByCurrentPositionAndcreateCardCountry() {
 btn.addEventListener("click", () =>
   getNameCountryByCurrentPositionAndcreateCardCountry()
 );
-//createCardCountry("russia");
-//createCardCountry("usa");
-//createCardCountry("deutschland");
-//createCardCountry("ukraine");
+
+async function getCountry(country) {
+  try {
+    const response = await fetch(
+      `https://restcountries.com/v3.1/name/${country}`
+    );
+    if (!response.ok) {
+      throw new Error(`Страна не найдена, код ошибки: ${response.status}`)
+    }
+    const data = await response.json();
+    console.log(response);
+    console.log(data);
+  } catch (err) {
+    console.log(err.message);
+  }
+}
+
+getCountry("usartert");
